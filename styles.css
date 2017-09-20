@@ -1,0 +1,59 @@
+html {
+    background-color: #fafafa;
+}
+
+h1, input, label, span {
+    font-family: Arial, sans-serif;
+    color: #111;
+}
+
+#form-div {
+    display: block;
+    margin: auto auto;
+    width: 250px;
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 2px 2px lightgray;
+    background-color: white;
+}
+
+#form-div form > label {
+    margin-left: 2px;
+}
+
+#form-div form > label > span {
+    color: red;
+}
+
+#form-div form > input{
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    font-size: 24px;
+    padding: 0 5px;
+    margin: 0 0 7px 0;
+    border-radius: 10px;
+    border: 1px solid darkgray;
+    outline: none;
+}
+
+#form-div form > input:focus {
+    border: 1px solid cornflowerblue;
+    box-shadow: 0 0 2px 1px #58b6ff;
+}
+
+#form-div form > input[type=submit] {
+    background: linear-gradient(to bottom, #00acff 0%, dodgerblue 100%);
+    color: white;
+}
+
+#form-div form > input[type=submit]:hover {
+    background: linear-gradient(to bottom, #00acff 50%, dodgerblue 100%);
+}
+
+#form-div form > input[type=submit]:active {
+    background: linear-gradient(to bottom, dodgerblue 50%, #00acff 100%);
+    color: lightgray;
+}
