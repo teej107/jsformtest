@@ -6,10 +6,8 @@ $(() => {
         }
     }
 
-    let getLabelFor = (target) => $(`label[for="${target.id || target}"]`);
-
-    let setErrorMessage = (target, message) => {
-        let label = getLabelFor(target);
+    const setErrorMessage = (target, message) => {
+        let label = $(`label[for="${target.id || target}"]`);
         let span = label.find('span');
         if (message) {
             if (span.html()) {
@@ -28,7 +26,7 @@ $(() => {
     const NON_ALPHA_NUMERICAL_REGEX = /[^a-z0-9]/gi;
     const SSN_REGEX = /[^0-9-]/g;
 
-    let alphaCheckListener = (event) => {
+    const alphaCheckListener = (event) => {
         let target = $(event.target);
         let oldStr = target.val();
         let newStr = oldStr.replace(NON_ALPHA_REGEX, '');
@@ -36,9 +34,9 @@ $(() => {
         setErrorMessage(event.target, (oldStr.length !== newStr.length ? 'Letters Only' : null));
     };
 
-    let alphaValidator = (str) => !NON_ALPHA_REGEX.test(str);
+    const alphaValidator = (str) => !NON_ALPHA_REGEX.test(str);
 
-    let employeeIdListener = (event) => {
+    const employeeIdListener = (event) => {
         let target = $(event.target);
         let oldStr = target.val();
         let newStr = oldStr.replace(NON_ALPHA_NUMERICAL_REGEX, '');
@@ -54,14 +52,14 @@ $(() => {
         }
     };
 
-    let employeeIdValidator = (str) => str.length < 6 && !NON_ALPHA_NUMERICAL_REGEX.test(str);
+    const employeeIdValidator = (str) => str.length < 6 && !NON_ALPHA_NUMERICAL_REGEX.test(str);
 
-    let ssnListener = (event) => {
+    const ssnListener = (event) => {
         let target = $(event.target);
         let oldStr = target.val();
-        if (oldStr.length >= 11) {
+        if (oldStr.length > 11) {
             target.val(oldStr.substring(0, 11));
-            setErrorMessage(event.target, (validateSSN(oldStr) ? null : "Must be valid SSN format"));
+            setErrorMessage(event.target, "Must be valid SSN format");
         }
         else {
             let newStr = oldStr.replace(SSN_REGEX, '');
@@ -74,9 +72,18 @@ $(() => {
                     newStr = newStr.substring(0, 6) + '-' + newStr.substring(6);
                 }
 
-                //TODO: Check for "illegal" hyphens
+                //Check for "illegal" hyphens
+                let hyphenIndex = newStr.indexOf('-');
+                let errMessage;
+                while (hyphenIndex !== -1) {
+                    if (hyphenIndex !== 3 && hyphenIndex !== 6) {
+                        newStr = newStr.substring(0, hyphenIndex) + newStr.substring(hyphenIndex + 1);
+                        errMessage = "Must be valid SSN format";
+                    }
+                    hyphenIndex = newStr.indexOf('-', hyphenIndex + 1);
+                }
 
-                setErrorMessage(event.target);
+                setErrorMessage(event.target, errMessage);
             }
             else {
                 setErrorMessage(event.target, "Must be valid SSN format");
@@ -86,7 +93,7 @@ $(() => {
 
     };
 
-    let validateSSN = (str) => {
+    const ssnValidator = (str) => {
         if (SSN_REGEX.test(str) || str.length !== 11)
             return false;
 
@@ -97,15 +104,19 @@ $(() => {
         return str.charAt(3) === '-' && str.charAt(6) === '-';
     };
 
-    let inputFunctions = {
+    const dobValidator = (str) => typeof str === 'string' && !isNaN(Date.parse(str));
+
+    const dobListener = (event) => setErrorMessage(event.target);
+
+    const inputFunctions = {
         'first-name': new InputChecker(alphaValidator, alphaCheckListener),
         'last-name': new InputChecker(alphaValidator, alphaCheckListener),
         'employee-id': new InputChecker(employeeIdValidator, employeeIdListener),
-        'dob': new InputChecker((str) => typeof str === 'string' && !isNaN(Date.parse(str))),
-        'ssn': new InputChecker(validateSSN, ssnListener)
+        'dob': new InputChecker(dobValidator, dobListener),
+        'ssn': new InputChecker(ssnValidator, ssnListener)
     };
 
-    let formDiv = $('#form-div');
+    const formDiv = $('#form-div');
 
     formDiv.on('focusout', (event) => {
         setErrorMessage(event.target);
@@ -121,14 +132,14 @@ $(() => {
     formDiv.on('submit', (event) => {
         let invalidFields = [];
         for (let key in inputFunctions) {
-            let target = $('#' + key);
-            if (target.val().length === 0 || !inputFunctions[key].validator(target.val())) {
-                invalidFields.push(getLabelFor(key).html());
+            let val = $('#' + key).val();
+            if (val.length === 0 || !inputFunctions[key].validator(val)) {
+                invalidFields.push(key);
             }
         }
         if (invalidFields.length > 0) {
             event.preventDefault();
-            alert("The following fields have invalid values:\n" + invalidFields.join('\n'));
+            invalidFields.forEach((id) => setErrorMessage(id, "Invalid input"));
         }
     });
 });
